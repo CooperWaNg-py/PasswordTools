@@ -537,10 +537,12 @@
                     <p>Detected character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)}</p>
                     <p>Character set size: ${state.bruteForce.charset.length}</p>
                     <p>Total combinations: ${state.bruteForce.totalCombinations.toLocaleString()}</p>
-                    <p>Current: <span class="brute-force-password" id="bf-current-attempt"></span></p>
-                    <p>Attempts: <span id="bf-attempt-count">0</span></p>
-                    <p>Time: <span id="bf-time-elapsed">0</span>s</p>
-                    <p>Speed: <span id="bf-attempt-rate">0</span>/s</p>
+                    <div id="bf-live-results">
+                        <p>Current: <span class="brute-force-password" id="bf-current-attempt"></span></p>
+                        <p>Attempts: <span id="bf-attempt-count">0</span></p>
+                        <p>Time: <span id="bf-time-elapsed">0</span>s</p>
+                        <p>Speed: <span id="bf-attempt-rate">0</span>/s</p>
+                    </div>
                 `;
                 
                 document.getElementById("bf-start-btn").style.display = "none";
@@ -623,12 +625,20 @@
                 
                 document.getElementById("bf-progress").style.width = `${progress}%`;
                 document.getElementById("bf-progress-text").textContent = `${progress.toFixed(2)}% complete`;
+                
                 if (currentGuess) {
-                    document.getElementById("bf-current-attempt").textContent = currentGuess;
+                    const currentAttemptEl = document.getElementById("bf-current-attempt");
+                    if (currentAttemptEl) currentAttemptEl.textContent = currentGuess;
                 }
-                document.getElementById("bf-attempt-count").textContent = state.bruteForce.attempts.toLocaleString();
-                document.getElementById("bf-time-elapsed").textContent = timeElapsed;
-                document.getElementById("bf-attempt-rate").textContent = speed.toLocaleString();
+                
+                const attemptCountEl = document.getElementById("bf-attempt-count");
+                if (attemptCountEl) attemptCountEl.textContent = state.bruteForce.attempts.toLocaleString();
+                
+                const timeElapsedEl = document.getElementById("bf-time-elapsed");
+                if (timeElapsedEl) timeElapsedEl.textContent = timeElapsed;
+                
+                const attemptRateEl = document.getElementById("bf-attempt-rate");
+                if (attemptRateEl) attemptRateEl.textContent = speed.toLocaleString();
             },
             getCharsetDescription: (charset) => {
                 const sets = [];
