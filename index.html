@@ -6,7 +6,265 @@
     <title>Password Toolkit</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;max-width:1000px;margin:0 auto;padding:20px;line-height:1.6;background:#f8f9fa;color:#333}h1{color:#2c3e50;text-align:center;margin-bottom:30px}.section{background:#fff;border-radius:8px;padding:20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.password-level{border-left:5px solid;margin-bottom:20px;padding-left:15px;margin-left:5px}.level-1{border-color:#e74c3c}.level-2{border-color:#e67e22}.level-3{border-color:#f39c12}.level-4{border-color:#2ecc71}.level-5{border-color:#27ae60}.level-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.level-title{font-size:1.2em;font-weight:700;margin:0}.password-display{font-family:'Courier New',monospace;font-size:18px;padding:12px;background:#f1f1f1;border-radius:4px;margin-bottom:10px;word-break:break-all;display:flex;justify-content:space-between;align-items:center}.password-text{flex-grow:1}.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s}.regenerate-btn{background:#3498db;color:#fff}.regenerate-btn:hover{background:#2980b9}.copy-btn{background:0 0;border:none;cursor:pointer;color:#3498db;font-size:14px;margin-left:10px}.strength-indicator{display:flex;align-items:center;margin-bottom:10px}.strength-label{width:100px;font-weight:700}.strength-bar{height:10px;flex-grow:1;background:#ecf0f1;border-radius:5px;overflow:hidden;margin-right:15px}.strength-fill{height:100%;width:0;transition:width .3s}.strength-text{font-size:.9em;min-width:80px}.info-box{background:#e8f4fc;padding:12px;border-radius:4px;font-size:.9em;margin-top:10px}.entropy-display{font-size:.9em;color:#7f8c8d;margin-top:5px}.input-group{margin-bottom:15px;position:relative}label{display:block;margin-bottom:5px;font-weight:700}input,select{padding:8px 12px;width:100%;border:1px solid #ddd;border-radius:4px;font-size:16px;box-sizing:border-box}.analyze-btn{background:#9b59b6;color:#fff;width:100%;padding:10px;font-size:16px}.analyze-btn:hover{background:#8e44ad}.mass-generate-btn{background:#1abc9c;color:#fff;width:100%;padding:10px;font-size:16px}.mass-generate-btn:hover{background:#16a085}.brute-force-btn{background:#e74c3c;color:#fff;width:100%;padding:10px;font-size:16px}.brute-force-btn:hover{background:#c0392b}.result-box{padding:15px;border-radius:4px;margin-top:15px;font-family:monospace;white-space:pre-wrap;background:#f1f1f1;max-height:200px;overflow-y:auto}.tab-container{display:flex;margin-bottom:20px}.tab{padding:10px 20px;cursor:pointer;background:#e0e0e0;border-radius:5px 5px 0 0;margin-right:5px}.tab.active{background:#fff;font-weight:700}.tab-content{display:none}.tab-content.active{display:block}.toggle-password{position:absolute;right:10px;top:32px;background:0 0;border:none;cursor:pointer;color:#3498db}.progress-container{margin-top:15px}.progress-bar{height:20px;background:#ecf0f1;border-radius:4px;overflow:hidden}.progress-fill{height:100%;width:0;background:#3498db;transition:width .3s}.progress-text{margin-top:5px;font-size:.9em}.brute-force-results{margin-top:15px}.brute-force-password{font-family:'Courier New',monospace;letter-spacing:2px;font-weight:700;background:#f1f1f1;padding:5px;border-radius:3px;display:inline-block;min-width:100px;text-align:center}.pattern-warning,.diversity-warning{color:#e74c3c;margin-top:10px;display:none;font-size:.9em}.password-group{display:flex;gap:10px;margin-bottom:10px}.password-item{flex:1}.nano-donation{text-align:center;margin-top:30px;color:#dbdbdb;font-size:12px}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f8f9fa;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+        .password-level {
+            border-left: 5px solid;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            margin-left: 5px;
+        }
+        .level-1 { border-color: #e74c3c }
+        .level-2 { border-color: #e67e22 }
+        .level-3 { border-color: #f39c12 }
+        .level-4 { border-color: #2ecc71 }
+        .level-5 { border-color: #27ae60 }
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .level-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin: 0;
+        }
+        .password-display {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            padding: 12px;
+            background: #f1f1f1;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .password-text {
+            flex-grow: 1;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color .2s;
+        }
+        .regenerate-btn {
+            background: #3498db;
+            color: #fff;
+        }
+        .regenerate-btn:hover {
+            background: #2980b9;
+        }
+        .copy-btn {
+            background: 0 0;
+            border: none;
+            cursor: pointer;
+            color: #3498db;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .strength-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .strength-label {
+            width: 100px;
+            font-weight: 700;
+        }
+        .strength-bar {
+            height: 10px;
+            flex-grow: 1;
+            background: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        .strength-fill {
+            height: 100%;
+            width: 0;
+            transition: width .3s;
+        }
+        .strength-text {
+            font-size: .9em;
+            min-width: 80px;
+        }
+        .info-box {
+            background: #e8f4fc;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: .9em;
+            margin-top: 10px;
+        }
+        .entropy-display {
+            font-size: .9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        input, select {
+            padding: 8px 12px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .analyze-btn {
+            background: #9b59b6;
+            color: #fff;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .analyze-btn:hover {
+            background: #8e44ad;
+        }
+        .mass-generate-btn {
+            background: #1abc9c;
+            color: #fff;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .mass-generate-btn:hover {
+            background: #16a085;
+        }
+        .brute-force-btn {
+            background: #e74c3c;
+            color: #fff;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .brute-force-btn:hover {
+            background: #c0392b;
+        }
+        .result-box {
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background: #f1f1f1;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #e0e0e0;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: #fff;
+            font-weight: 700;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 32px;
+            background: 0 0;
+            border: none;
+            cursor: pointer;
+            color: #3498db;
+        }
+        .progress-container {
+            margin-top: 15px;
+        }
+        .progress-bar {
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: #3498db;
+            transition: width .3s;
+        }
+        .progress-text {
+            margin-top: 5px;
+            font-size: .9em;
+        }
+        .brute-force-results {
+            margin-top: 15px;
+        }
+        .brute-force-password {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            font-weight: 700;
+            background: #f1f1f1;
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+        }
+        .pattern-warning, .diversity-warning {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+            font-size: .9em;
+        }
+        .password-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .password-item {
+            flex: 1;
+        }
+        .nano-donation {
+            text-align: center;
+            margin-top: 30px;
+            color: #dbdbdb;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -17,11 +275,13 @@
         <div class="tab" onclick="switchTab('mass-generator')">Mass Generator</div>
         <div class="tab" onclick="switchTab('brute-force')">Brute Force</div>
     </div>
+    
     <div id="generator" class="tab-content active">
         <div class="section">
             <div id="password-levels"></div>
         </div>
     </div>
+    
     <div id="analyzer" class="tab-content">
         <div class="section">
             <div class="input-group">
@@ -45,6 +305,7 @@
             </div>
         </div>
     </div>
+    
     <div id="mass-generator" class="tab-content">
         <div class="section">
             <div class="input-group">
@@ -66,6 +327,7 @@
             <button class="btn" onclick="savePasswordsToFile()" style="width:100%;margin-top:10px">Save to passwords.txt</button>
         </div>
     </div>
+    
     <div id="brute-force" class="tab-content">
         <div class="section">
             <div class="input-group">
@@ -89,9 +351,11 @@
             </div>
         </div>
     </div>
+    
     <div class="nano-donation">
         NANO (XNO) donation: nano_3gkue8bcocnxrsgxgoz3xyc54yzzkzainpq6pqxwezs6i3beis8b5oey46ft
     </div>
+
     <script>
         // Configuration
         const config = {
