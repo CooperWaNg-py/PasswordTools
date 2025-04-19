@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Password Toolkit</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;max-width:1000px;margin:0 auto;padding:20px;line-height:1.6;background:#f8f9fa;color:#333}h1{color:#2c3e50;text-align:center;margin-bottom:30px}.section{background:#fff;border-radius:8px;padding:20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.password-level{border-left:5px solid;margin-bottom:20px;padding-left:15px;margin-left:5px}.level-1{border-color:#e74c3c}.level-2{border-color:#e67e22}.level-3{border-color:#f39c12}.level-4{border-color:#2ecc71}.level-5{border-color:#27ae60}.level-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.level-title{font-size:1.2em;font-weight:700;margin:0}.password-display{font-family:'Courier New',monospace;font-size:18px;padding:12px;background:#f1f1f1;border-radius:4px;margin-bottom:10px;word-break:break-all;display:flex;justify-content:space-between;align-items:center}.password-text{flex-grow:1}.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s}.regenerate-btn{background:#3498db;color:#fff}.regenerate-btn:hover{background:#2980b9}.copy-btn{background:0 0;border:none;cursor:pointer;color:#3498db;font-size:14px;margin-left:10px}.strength-indicator,.memorability-meter{display:flex;align-items:center;margin-bottom:10px}.strength-label,.memorability-label{width:100px;font-weight:700}.strength-bar,.memorability-bar{height:10px;flex-grow:1;background:#ecf0f1;border-radius:5px;overflow:hidden;margin-right:15px}.strength-fill{height:100%;width:0;transition:width .3s}.strength-text,.memorability-text{font-size:.9em;min-width:80px}.memorability-fill{height:100%;width:0;transition:width .3s;background:#9b59b6}.info-box{background:#e8f4fc;padding:12px;border-radius:4px;font-size:.9em;margin-top:10px}.entropy-display,.memorability-display{font-size:.9em;color:#7f8c8d;margin-top:5px}.input-group{margin-bottom:15px;position:relative}label{display:block;margin-bottom:5px;font-weight:700}input,select{padding:8px 12px;width:100%;border:1px solid #ddd;border-radius:4px;font-size:16px;box-sizing:border-box}.analyze-btn{background:#9b59b6;color:#fff;width:100%;padding:10px;font-size:16px}.analyze-btn:hover{background:#8e44ad}.mass-generate-btn{background:#1abc9c;color:#fff;width:100%;padding:10px;font-size:16px}.mass-generate-btn:hover{background:#16a085}.brute-force-btn{background:#e74c3c;color:#fff;width:100%;padding:10px;font-size:16px}.brute-force-btn:hover{background:#c0392b}.result-box{padding:15px;border-radius:4px;margin-top:15px;font-family:monospace;white-space:pre-wrap;background:#f1f1f1;max-height:200px;overflow-y:auto}.tab-container{display:flex;margin-bottom:20px}.tab{padding:10px 20px;cursor:pointer;background:#e0e0e0;border-radius:5px 5px 0 0;margin-right:5px}.tab.active{background:#fff;font-weight:700}.tab-content{display:none}.tab-content.active{display:block}.toggle-password{position:absolute;right:10px;top:32px;background:0 0;border:none;cursor:pointer;color:#3498db}.progress-container{margin-top:15px}.progress-bar{height:20px;background:#ecf0f1;border-radius:4px;overflow:hidden}.progress-fill{height:100%;width:0;background:#3498db;transition:width .3s}.progress-text{margin-top:5px;font-size:.9em}.brute-force-results{margin-top:15px}.brute-force-password{font-family:'Courier New',monospace;letter-spacing:2px;font-weight:700}.pattern-warning,.diversity-warning{color:#e74c3c;margin-top:10px;display:none;font-size:.9em}.password-group{display:flex;gap:10px;margin-bottom:10px}.password-item{flex:1}.nano-donation{text-align:center;margin-top:30px;color:#dbdbdb;font-size:12px}
+    </style>
+</head>
+<body>
+    <h1>Password Toolkit</h1>
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('generator')">Generator</div>
+        <div class="tab" onclick="switchTab('analyzer')">Analyzer</div>
+        <div class="tab" onclick="switchTab('mass-generator')">Mass Generator</div>
+        <div class="tab" onclick="switchTab('brute-force')">Brute Force</div>
+    </div>
+    <div id="generator" class="tab-content active">
+        <div class="section">
+            <div id="password-levels"></div>
+        </div>
+    </div>
+    <div id="analyzer" class="tab-content">
+        <div class="section">
+            <div class="input-group">
+                <label for="password-to-analyze">Enter a password to analyze:</label>
+                <input type="password" id="password-to-analyze" placeholder="Type or paste a password here">
+                <button class="toggle-password" onclick="togglePasswordVisibility('password-to-analyze',this)">Show</button>
+            </div>
+            <div class="pattern-warning" id="pattern-warning">Warning: Simple pattern detected</div>
+            <div class="diversity-warning" id="diversity-warning">Warning: Low character diversity</div>
+            <button class="btn analyze-btn" onclick="analyzePassword()">Analyze Password</button>
+            <div id="analysis-result" style="display:none">
+                <div class="strength-indicator">
+                    <span class="strength-label">Strength:</span>
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="analysis-strength-bar" style="width:0"></div>
+                    </div>
+                    <span class="strength-text" id="analysis-strength-text"></span>
+                </div>
+                <div class="entropy-display" id="analysis-entropy"></div>
+                <div class="memorability-meter">
+                    <span class="memorability-label">Memorability:</span>
+                    <div class="memorability-bar">
+                        <div class="memorability-fill" id="analysis-memorability-bar" style="width:0"></div>
+                    </div>
+                    <span class="memorability-text" id="analysis-memorability-text"></span>
+                </div>
+                <div class="info-box" id="analysis-description"></div>
+            </div>
+        </div>
+    </div>
+    <div id="mass-generator" class="tab-content">
+        <div class="section">
+            <div class="input-group">
+                <label for="mass-count">Number to generate (5-200):</label>
+                <input type="number" id="mass-count" min="5" max="200" value="10">
+            </div>
+            <div class="input-group">
+                <label for="mass-level">Security level:</label>
+                <select id="mass-level">
+                    <option value="1">Level 1 - Very Weak</option>
+                    <option value="2">Level 2 - Weak</option>
+                    <option value="3">Level 3 - Moderate</option>
+                    <option value="4">Level 4 - Strong</option>
+                    <option value="5">Level 5 - Extreme</option>
+                </select>
+            </div>
+            <button class="btn mass-generate-btn" onclick="generateMassPasswords()">Generate</button>
+            <div class="result-box" id="mass-passwords-result"></div>
+            <button class="btn" onclick="savePasswordsToFile()" style="width:100%;margin-top:10px">Save to passwords.txt</button>
+        </div>
+    </div>
+    <div id="brute-force" class="tab-content">
+        <div class="section">
+            <div class="input-group">
+                <label for="bf-target-password">Password to crack:</label>
+                <input type="password" id="bf-target-password" placeholder="Enter target password">
+                <button class="toggle-password" onclick="togglePasswordVisibility('bf-target-password',this)">Show</button>
+            </div>
+            <button class="btn brute-force-btn" id="bf-start-btn" onclick="startBruteForce()">Start Simulation</button>
+            <button class="btn" id="bf-stop-btn" onclick="stopBruteForce()" style="width:100%;margin-top:10px;display:none">Stop</button>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="bf-progress"></div>
+                </div>
+                <div class="progress-text" id="bf-progress-text">0% complete</div>
+            </div>
+            <div class="brute-force-results" id="bf-results">
+                <p>Current: <span class="brute-force-password" id="bf-current-attempt"></span></p>
+                <p>Attempts: <span id="bf-attempt-count">0</span></p>
+                <p>Time: <span id="bf-time-elapsed">0</span>s</p>
+                <p>Speed: <span id="bf-attempt-rate">0</span>/s</p>
+            </div>
+        </div>
+    </div>
+    <div class="nano-donation">
+        NANO (XNO) donation: nano_3gkue8bcocnxrsgxgoz3xyc54yzzkzainpq6pqxwezs6i3beis8b5oey46ft
+    </div>
+    <script>
+        // Configuration
+        const config = {
+            bruteForce: {
+                batchSize: 1000,
+                switchInterval: 50000
+            },
+            allowedChars: {
+                lowercase: "abcdefghijklmnopqrstuvwxyz",
+                uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                numbers: "0123456789",
+                symbols: "!-?._"
+            },
+            levels: [
+                {level:1,name:"Very Weak",description:"Easily guessable",length:[4,6],charset:["lowercase"],strengthColor:"#e74c3c"},
+                {level:2,name:"Weak",description:"Crackable in minutes",length:[6,9],charset:["lowercase","numbers"],strengthColor:"#e67e22"},
+                {level:3,name:"Moderate",description:"Days to years to crack",length:[8,12],charset:["lowercase","uppercase","numbers"],strengthColor:"#f39c12"},
+                {level:4,name:"Strong",description:"Years to centuries",length:[12,17],charset:["lowercase","uppercase","numbers","symbols"],strengthColor:"#2ecc71"},
+                {level:5,name:"Extreme",description:"Virtually unbreakable",length:[20,30],charset:["lowercase","uppercase","numbers","symbols"],strengthColor:"#27ae60"}
+            ]
+        };
+
+        // State management
+        const state = {
+            bruteForce: {
+                running: false,
+                interval: null,
+                startTime: 0,
+                attempts: 0,
+                lastUpdate: 0,
+                currentStart: 0,
+                totalCombinations: 0,
+                charset: ""
+            }
+        };
+
+        // DOM Utilities
+        const dom = {
+            switchTab: (tabId) => {
+                document.querySelectorAll(".tab-content").forEach(e => e.classList.remove("active"));
+                document.querySelectorAll(".tab").forEach(e => e.classList.remove("active"));
+                document.getElementById(tabId).classList.add("active");
+                document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add("active");
+            },
+            togglePassword: (id, btn) => {
+                const el = document.getElementById(id);
+                el.type = el.type === "password" ? "text" : "password";
+                btn.textContent = el.type === "text" ? "Hide" : "Show";
+            },
+            copyToClipboard: (btn) => {
+                const text = btn.parentNode.querySelector(".password-text").textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = "Copied!";
+                    setTimeout(() => btn.textContent = original, 2000);
+                });
+            }
+        };
+
+        // Password Generation
+        const password = {
+            generate: (levelConfig) => {
+                const length = levelConfig.length[0] + Math.floor(Math.random() * (levelConfig.length[1] - levelConfig.length[0] + 1));
+                let result = "", uniqueChars = 0;
+                const minUnique = Math.max(2, Math.ceil(0.5 * length));
+                const charset = password.getCharset(levelConfig.charset);
+                
+                while (result.length < length) {
+                    const char = charset[Math.floor(Math.random() * charset.length)];
+                    if (result.length >= 2 && char === result[result.length-1] && char === result[result.length-2]) continue;
+                    if (result.indexOf(char) === -1) uniqueChars++;
+                    if (result.length >= length-2 && uniqueChars < minUnique) { result = ""; uniqueChars = 0; continue; }
+                    result += char;
+                }
+                return result;
+            },
+            getCharset: (types) => {
+                let charset = "";
+                types.forEach(type => {
+                    charset += config.allowedChars[type];
+                });
+                return charset;
+            },
+            generateMass: (count, level) => {
+                const levelConfig = config.levels.find(l => l.level === level);
+                let passwords = "";
+                for (let i = 0; i < count; i++) {
+                    passwords += password.generate(levelConfig) + "\n";
+                }
+                return passwords;
+            },
+            detectCharset: (pwd) => {
+                let charset = "";
+                if (/[a-z]/.test(pwd)) charset += config.allowedChars.lowercase;
+                if (/[A-Z]/.test(pwd)) charset += config.allowedChars.uppercase;
+                if (/[0-9]/.test(pwd)) charset += config.allowedChars.numbers;
+                if (/[!\-\?\._]/.test(pwd)) charset += config.allowedChars.symbols;
+                return charset || config.allowedChars.lowercase;
+            }
+        };
+
+        // Password Analysis
+        const analysis = {
+            calculateEntropy: (pwd, charset) => {
+                if (!pwd) return 0;
+                
+                // Character set detection
+                let charsetSize = 0;
+                if (/[a-z]/.test(pwd)) charsetSize += 26;
+                if (/[A-Z]/.test(pwd)) charsetSize += 26;
+                if (/[0-9]/.test(pwd)) charsetSize += 10;
+                if (/[!\-\?\._]/.test(pwd)) charsetSize += 5; // !-?._
+                if (charsetSize === 0) charsetSize = charset.length;
+                
+                // Pattern detection
+                let patternFactor = 1;
+                const patterns = [
+                    new RegExp(`^${pwd[0]}+$`),
+                    /^([a-zA-Z0-9]{2,3})+$/,
+                    /(abc|def|ghi|jkl|mno|pqr|stu|vwx|yz|012|345|678|890)/i,
+                    /(qwerty|asdfgh|zxcvbn|123456)/i,
+                    /^(.)\1+$/
+                ];
+                
+                if (patterns.some(re => re.test(pwd))) {
+                    patternFactor *= 0.1;
+                    document.getElementById("pattern-warning").style.display = "block";
+                } else {
+                    document.getElementById("pattern-warning").style.display = "none";
+                }
+                
+                // Diversity check
+                const uniqueChars = new Set(pwd.split("")).size;
+                const diversityRatio = uniqueChars / pwd.length;
+                
+                if (diversityRatio < 0.5) {
+                    patternFactor *= 0.7;
+                    document.getElementById("diversity-warning").style.display = "block";
+                } else {
+                    document.getElementById("diversity-warning").style.display = "none";
+                }
+                
+                // Length factor
+                const lengthFactor = 1 + pwd.length / 20;
+                
+                // Final entropy calculation
+                return Math.max(1, Math.log2(charsetSize) * pwd.length * patternFactor * lengthFactor);
+            },
+            calculateStrength: (entropy) => {
+                return entropy < 10 ? {percent:10,text:"Very Weak"} :
+                       entropy < 28 ? {percent:20,text:"Very Weak"} :
+                       entropy < 36 ? {percent:40,text:"Weak"} :
+                       entropy < 60 ? {percent:60,text:"Moderate"} :
+                       entropy < 100 ? {percent:80,text:"Strong"} :
+                       {percent:100,text:"Extreme"};
+            },
+            calculateMemorability: (pwd) => {
+                if (!pwd) return 0;
+                let score = 50;
+                
+                // Length factor (shorter = better)
+                score += (20 - Math.min(20, pwd.length)) * 2;
+                
+                // Character diversity
+                const uniqueChars = new Set(pwd.split("")).size;
+                const diversityRatio = uniqueChars / pwd.length;
+                score *= 0.5 + 0.5 * diversityRatio;
+                
+                // Vowel/consonant balance
+                const hasVowels = /[aeiouAEIOU]/.test(pwd);
+                const hasConsonants = /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/.test(pwd);
+                if (hasVowels && hasConsonants) score *= 1.3;
+                
+                // Complexity penalty
+                if (/[!\-\?\._]/.test(pwd) || (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd))) score *= 0.8;
+                
+                // Repeated characters penalty
+                if (/^(.)\1+$/.test(pwd)) score *= 0.5;
+                
+                return Math.max(0, Math.min(100, Math.round(score)));
+            }
+        };
+
+        // Brute Force Simulation
+        const bruteForce = {
+            start: () => {
+                const target = document.getElementById("bf-target-password").value;
+                if (!target) return alert("Please enter a target password");
+                
+                // Automatically detect charset from password
+                state.bruteForce.charset = password.detectCharset(target);
+                const length = target.length;
+                
+                state.bruteForce.running = true;
+                state.bruteForce.startTime = Date.now();
+                state.bruteForce.attempts = 0;
+                state.bruteForce.lastUpdate = state.bruteForce.startTime;
+                state.bruteForce.currentStart = 0;
+                state.bruteForce.totalCombinations = Math.pow(state.bruteForce.charset.length, length);
+                
+                document.getElementById("bf-results").innerHTML = `
+                    <p>Starting brute force simulation...</p>
+                    <p>Password length: ${length}</p>
+                    <p>Detected character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)}</p>
+                    <p>Character set size: ${state.bruteForce.charset.length}</p>
+                    <p>Total combinations: ${state.bruteForce.totalCombinations.toLocaleString()}</p>
+                    <p>Current: <span class="brute-force-password" id="bf-current-attempt"></span></p>
+                    <p>Attempts: <span id="bf-attempt-count">0</span></p>
+                    <p>Time: <span id="bf-time-elapsed">0</span>s</p>
+                    <p>Speed: <span id="bf-attempt-rate">0</span>/s</p>
+                `;
+                
+                document.getElementById("bf-start-btn").style.display = "none";
+                document.getElementById("bf-stop-btn").style.display = "block";
+                
+                bruteForce.loop(target, length);
+            },
+            loop: (target, length) => {
+                if (!state.bruteForce.running) return;
+                
+                let batchCount = 0;
+                const startTime = performance.now();
+                
+                while (batchCount < config.bruteForce.batchSize && 
+                       state.bruteForce.attempts < state.bruteForce.totalCombinations) {
+                    
+                    // Switch starting point every N attempts
+                    if (state.bruteForce.attempts % config.bruteForce.switchInterval === 0) {
+                        state.bruteForce.currentStart = Math.floor(Math.random() * state.bruteForce.totalCombinations);
+                    }
+                    
+                    // Generate attempt
+                    const currentAttempt = (state.bruteForce.currentStart + state.bruteForce.attempts) % state.bruteForce.totalCombinations;
+                    const guess = bruteForce.generateGuess(currentAttempt, state.bruteForce.charset, length);
+                    
+                    // Check match
+                    if (guess === target) {
+                        bruteForce.stop(true, guess);
+                        return;
+                    }
+                    
+                    state.bruteForce.attempts++;
+                    batchCount++;
+                    
+                    // Update UI periodically
+                    if (performance.now() - startTime > 16) { // ~60fps
+                        bruteForce.updateProgress(length, guess);
+                        requestAnimationFrame(() => bruteForce.loop(target, length));
+                        return;
+                    }
+                }
+                
+                if (state.bruteForce.attempts < state.bruteForce.totalCombinations) {
+                    bruteForce.updateProgress(length);
+                    requestAnimationFrame(() => bruteForce.loop(target, length));
+                } else {
+                    bruteForce.stop(false);
+                }
+            },
+            stop: (found, password = "") => {
+                state.bruteForce.running = false;
+                const time = ((Date.now() - state.bruteForce.startTime) / 1000).toFixed(2);
+                
+                document.getElementById("bf-results").innerHTML += found ? 
+                    `<p style="color:#e74c3c;font-weight:700">PASSWORD FOUND: ${password}</p>
+                     <p>Total attempts: ${state.bruteForce.attempts.toLocaleString()}</p>
+                     <p>Total time: ${time}s</p>` :
+                    `<p>Password not found after ${state.bruteForce.attempts.toLocaleString()} attempts</p>
+                     <p>Total time: ${time}s</p>`;
+                
+                document.getElementById("bf-start-btn").style.display = "block";
+                document.getElementById("bf-stop-btn").style.display = "none";
+            },
+            generateGuess: (index, charset, length) => {
+                let result = "";
+                let remaining = index;
+                
+                for (let i = 0; i < length; i++) {
+                    const charIndex = remaining % charset.length;
+                    result = charset[charIndex] + result;
+                    remaining = Math.floor(remaining / charset.length);
+                }
+                
+                return result;
+            },
+            updateProgress: (length, currentGuess = "") => {
+                const progress = Math.min(100, state.bruteForce.attempts / state.bruteForce.totalCombinations * 100);
+                const timeElapsed = ((Date.now() - state.bruteForce.startTime) / 1000).toFixed(2);
+                const speed = Math.floor(state.bruteForce.attempts / (timeElapsed || 1));
+                
+                document.getElementById("bf-progress").style.width = `${progress}%`;
+                document.getElementById("bf-progress-text").textContent = `${progress.toFixed(2)}% complete`;
+                if (currentGuess) document.getElementById("bf-current-attempt").textContent = currentGuess;
+                document.getElementById("bf-attempt-count").textContent = state.bruteForce.attempts.toLocaleString();
+                document.getElementById("bf-time-elapsed").textContent = timeElapsed;
+                document.getElementById("bf-attempt-rate").textContent = speed.toLocaleString();
+            },
+            getCharsetDescription: (charset) => {
+                const sets = [];
+                if (charset.includes(config.allowedChars.lowercase)) sets.push("lowercase");
+                if (charset.includes(config.allowedChars.uppercase)) sets.push("uppercase");
+                if (charset.includes(config.allowedChars.numbers)) sets.push("numbers");
+                if (charset.includes(config.allowedChars.symbols)) sets.push("symbols");
+                return sets.join(" + ") || "lowercase";
+            }
+        };
+
+        // UI Functions
+        const ui = {
+            generateAllPasswords: () => {
+                const container = document.getElementById("password-levels");
+                container.innerHTML = "";
+                
+                config.levels.forEach(level => {
+                    const levelEl = document.createElement("div");
+                    levelEl.className = `password-level level-${level.level}`;
+                    
+                    let passwordsHTML = "";
+                    for (let i = 0; i < 3; i++) {
+                        const pwd = password.generate(level);
+                        const charset = password.getCharset(level.charset);
+                        const entropy = analysis.calculateEntropy(pwd, charset);
+                        const strength = analysis.calculateStrength(entropy);
+                        const memorability = analysis.calculateMemorability(pwd);
+                        
+                        passwordsHTML += `
+                            <div class="password-group">
+                                <div class="password-item">
+                                    <div class="password-display">
+                                        <span class="password-text">${pwd}</span>
+                                        <button class="copy-btn" onclick="dom.copyToClipboard(this)">Copy</button>
+                                    </div>
+                                    <div class="strength-indicator">
+                                        <span class="strength-label">Strength:</span>
+                                        <div class="strength-bar">
+                                            <div class="strength-fill" style="width:${strength.percent}%;background-color:${level.strengthColor}"></div>
+                                        </div>
+                                        <span class="strength-text" style="color:${level.strengthColor}">${strength.text}</span>
+                                    </div>
+                                    <div class="entropy-display">Entropy: ~${Math.round(entropy)} bits</div>
+                                    <div class="memorability-meter">
+                                        <span class="memorability-label">Memorability:</span>
+                                        <div class="memorability-bar">
+                                            <div class="memorability-fill" style="width:${memorability}%"></div>
+                                        </div>
+                                        <span class="memorability-text">${memorability}/100</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                    
+                    levelEl.innerHTML = `
+                        <div class="level-header">
+                            <h3 class="level-title">Level ${level.level}: ${level.name}</h3>
+                            <button class="btn regenerate-btn" onclick="ui.regenerateLevel(${level.level})">Regenerate All</button>
+                        </div>
+                        ${passwordsHTML}
+                        <div class="info-box">${level.description}</div>`;
+                    
+                    container.appendChild(levelEl);
+                });
+            },
+            regenerateLevel: (level) => {
+                const levelConfig = config.levels.find(l => l.level === level);
+                const levelEl = document.querySelector(`.level-${level}`);
+                const passwordGroups = levelEl.querySelectorAll(".password-group");
+                
+                passwordGroups.forEach(group => {
+                    const pwd = password.generate(levelConfig);
+                    const charset = password.getCharset(levelConfig.charset);
+                    const entropy = analysis.calculateEntropy(pwd, charset);
+                    const strength = analysis.calculateStrength(entropy);
+                    const memorability = analysis.calculateMemorability(pwd);
+                    
+                    group.querySelector(".password-text").textContent = pwd;
+                    group.querySelector(".strength-fill").style.width = `${strength.percent}%`;
+                    group.querySelector(".strength-fill").style.backgroundColor = levelConfig.strengthColor;
+                    group.querySelector(".strength-text").textContent = strength.text;
+                    group.querySelector(".strength-text").style.color = levelConfig.strengthColor;
+                    group.querySelector(".entropy-display").textContent = `Entropy: ~${Math.round(entropy)} bits`;
+                    group.querySelector(".memorability-fill").style.width = `${memorability}%`;
+                    group.querySelector(".memorability-text").textContent = `${memorability}/100`;
+                });
+            },
+            analyzePassword: () => {
+                document.getElementById("pattern-warning").style.display = "none";
+                document.getElementById("diversity-warning").style.display = "none";
+                
+                const pwd = document.getElementById("password-to-analyze").value;
+                if (!pwd) return alert("Please enter a password");
+                
+                // Validate characters (only allow a-z, A-Z, 0-9, !-?._)
+                const invalidChars = [];
+                const allowedChars = password.getCharset(["lowercase", "uppercase", "numbers", "symbols"]);
+                
+                for (const char of pwd) {
+                    if (!allowedChars.includes(char) && !invalidChars.includes(char)) {
+                        invalidChars.push(char);
+                    }
+                }
+                
+                if (invalidChars.length > 0) {
+                    return alert(`Invalid characters: ${invalidChars.join(", ")}\nOnly A-Z, a-z, 0-9, and !-?._ allowed`);
+                }
+                
+                // Perform analysis
+                const charset = password.detectCharset(pwd);
+                const entropy = analysis.calculateEntropy(pwd, charset);
+                const strength = analysis.calculateStrength(entropy);
+                const memorability = analysis.calculateMemorability(pwd);
+                const level = config.levels.find(l => l.name.includes(strength.text));
+                
+                // Update UI
+                document.getElementById("analysis-strength-bar").style.width = `${strength.percent}%`;
+                document.getElementById("analysis-strength-bar").style.backgroundColor = level.strengthColor;
+                document.getElementById("analysis-strength-text").textContent = strength.text;
+                document.getElementById("analysis-strength-text").style.color = level.strengthColor;
+                document.getElementById("analysis-entropy").textContent = `Entropy: ~${Math.round(entropy)} bits`;
+                document.getElementById("analysis-memorability-bar").style.width = `${memorability}%`;
+                document.getElementById("analysis-memorability-text").textContent = `${memorability}/100`;
+                
+                // Generate description
+                let description = "";
+                switch(strength.text) {
+                    case "Very Weak": 
+                        description = "This password is very weak and can be guessed in seconds. It's vulnerable to dictionary attacks and brute force.";
+                        break;
+                    case "Weak":
+                        description = "This password is weak and could be cracked in minutes to hours. It's vulnerable to brute force attacks with moderate resources.";
+                        break;
+                    case "Moderate":
+                        description = "This password offers moderate protection. It could take days to years to crack depending on the attacker's resources.";
+                        break;
+                    case "Strong":
+                        description = "This is a strong password that would take years to centuries to crack with current technology.";
+                        break;
+                    case "Extreme":
+                        description = "This is an extremely strong password. It would take longer than the age of the universe to crack by brute force.";
+                        break;
+                }
+                
+                description += memorability < 30 ? 
+                    "\n\nThis password will be very difficult to remember. Consider using a passphrase instead." :
+                    memorability < 60 ? 
+                    "\n\nThis password may be somewhat difficult to remember. Consider using mnemonic techniques." :
+                    "\n\nThis password has good memorability characteristics.";
+                
+                document.getElementById("analysis-description").textContent = description;
+                document.getElementById("analysis-result").style.display = "block";
+            },
+            generateMassPasswords: () => {
+                const count = parseInt(document.getElementById("mass-count").value);
+                if (isNaN(count) || count < 5 || count > 200) {
+                    return alert("Please enter a number between 5 and 200");
+                }
+                
+                const level = parseInt(document.getElementById("mass-level").value);
+                const passwords = password.generateMass(count, level);
+                document.getElementById("mass-passwords-result").textContent = passwords;
+            },
+            savePasswordsToFile: () => {
+                const content = document.getElementById("mass-passwords-result").textContent;
+                if (!content) return alert("No passwords to save. Generate some first");
+                
+                const blob = new Blob([content], {type: "text/plain"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "passwords.txt";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        };
+
+        // Global functions for HTML event handlers
+        window.switchTab = dom.switchTab;
+        window.togglePasswordVisibility = dom.togglePassword;
+        window.copyToClipboard = dom.copyToClipboard;
+        window.regenerateLevel = ui.regenerateLevel;
+        window.analyzePassword = ui.analyzePassword;
+        window.generateMassPasswords = ui.generateMassPasswords;
+        window.savePasswordsToFile = ui.savePasswordsToFile;
+        window.startBruteForce = bruteForce.start;
+        window.stopBruteForce = () => bruteForce.stop(false);
+
+        // Initialize
+        window.onload = function() {
+            ui.generateAllPasswords();
+        };
+    </script>
+</body>
+</html>
