@@ -514,33 +514,40 @@
             }
         };
 
-        // Brute Force Simulation
-        const bruteForce = {
+                // Brute Force Simulation
+                const bruteForce = {
             start: () => {
-                const target = document.getElementById("bf-target-password").value;
+                const target = document.getElementById("bf-target-password").value.trim();
                 if (!target) return alert("Please enter a target password");
                 
-                // Automatically detect charset from password
-                state.bruteForce.charset = password.detectCharset(target);
-                const length = target.length;
+                // Reset state
+                state.bruteForce = {
+                    running: true,
+                    startTime: Date.now(),
+                    attempts: 0,
+                    charset: password.detectCharset(target),
+                    target: target,
+                    length: target.length,
+                    currentGuess: "",
+                    lastUpdate: 0
+                };
                 
-                state.bruteForce.running = true;
-                state.bruteForce.startTime = Date.now();
-                state.bruteForce.attempts = 0;
-                state.bruteForce.lastUpdate = state.bruteForce.startTime;
-                state.bruteForce.currentStart = 0;
-                state.bruteForce.totalCombinations = Math.pow(state.bruteForce.charset.length, length);
+                // Calculate combinations
+                state.bruteForce.totalCombinations = Math.pow(
+                    state.bruteForce.charset.length, 
+                    state.bruteForce.length
+                );
                 
+                // Update UI
                 document.getElementById("bf-results").innerHTML = `
                     <p>Starting brute force simulation...</p>
-                    <p>Password length: ${length}</p>
-                    <p>Detected character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)}</p>
-                    <p>Character set size: ${state.bruteForce.charset.length}</p>
+                    <p>Password length: ${state.bruteForce.length}</p>
+                    <p>Character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)}</p>
                     <p>Total combinations: ${state.bruteForce.totalCombinations.toLocaleString()}</p>
                     <div id="bf-live-results">
                         <p>Current: <span class="brute-force-password" id="bf-current-attempt"></span></p>
                         <p>Attempts: <span id="bf-attempt-count">0</span></p>
-                        <p>Time: <span id="bf-time-elapsed">0</span>s</p>
+                        <p>Time: <span id="bf-time-elapsed">0.00</span>s</p>
                         <p>Speed: <span id="bf-attempt-rate">0</span>/s</p>
                     </div>
                 `;
@@ -548,64 +555,78 @@
                 document.getElementById("bf-start-btn").style.display = "none";
                 document.getElementById("bf-stop-btn").style.display = "block";
                 
-                bruteForce.loop(target, length);
+                // Start the process
+                bruteForce.runBatch();
             },
-            loop: (target, length) => {
+        
+            runBatch: () => {
                 if (!state.bruteForce.running) return;
                 
-                let batchCount = 0;
-                const startTime = performance.now();
+                const batchStart = performance.now();
+                let found = false;
                 
-                while (batchCount < config.bruteForce.batchSize && 
-                       state.bruteForce.attempts < state.bruteForce.totalCombinations) {
-                    
-                    // Switch starting point every N attempts
-                    if (state.bruteForce.attempts % config.bruteForce.switchInterval === 0) {
-                        state.bruteForce.currentStart = Math.floor(Math.random() * state.bruteForce.totalCombinations);
+                // Process a batch of attempts
+                for (let i = 0; i < config.bruteForce.batchSize; i++) {
+                    if (state.bruteForce.attempts >= state.bruteForce.totalCombinations) {
+                        bruteForce.stop(false);
+                        return;
                     }
                     
-                    // Generate attempt
-                    const currentAttempt = (state.bruteForce.currentStart + state.bruteForce.attempts) % state.bruteForce.totalCombinations;
-                    const guess = bruteForce.generateGuess(currentAttempt, state.bruteForce.charset, length);
+                    // Generate next attempt
+                    state.bruteForce.currentGuess = bruteForce.generateGuess(
+                        state.bruteForce.attempts,
+                        state.bruteForce.charset,
+                        state.bruteForce.length
+                    );
                     
-                    // Check match
-                    if (guess === target) {
-                        bruteForce.stop(true, guess);
-                        return;
+                    // Check for match
+                    if (state.bruteForce.currentGuess === state.bruteForce.target) {
+                        found = true;
+                        break;
                     }
                     
                     state.bruteForce.attempts++;
-                    batchCount++;
                     
                     // Update UI periodically
-                    if (performance.now() - startTime > 16) { // ~60fps
-                        bruteForce.updateProgress(length, guess);
-                        requestAnimationFrame(() => bruteForce.loop(target, length));
-                        return;
+                    const now = Date.now();
+                    if (now - state.bruteForce.lastUpdate > 100) { // Update every 100ms
+                        bruteForce.updateProgress();
+                        state.bruteForce.lastUpdate = now;
                     }
                 }
                 
-                if (state.bruteForce.attempts < state.bruteForce.totalCombinations) {
-                    bruteForce.updateProgress(length);
-                    requestAnimationFrame(() => bruteForce.loop(target, length));
+                if (found) {
+                    bruteForce.stop(true);
                 } else {
-                    bruteForce.stop(false);
+                    bruteForce.updateProgress();
+                    
+                    // Continue with next batch
+                    if (performance.now() - batchStart < 50) {
+                        // If we have time left in the frame, do another batch immediately
+                        requestAnimationFrame(bruteForce.runBatch);
+                    } else {
+                        // Otherwise yield to browser and continue later
+                        setTimeout(bruteForce.runBatch, 0);
+                    }
                 }
             },
-            stop: (found, password = "") => {
+        
+            stop: (found) => {
                 state.bruteForce.running = false;
                 const time = ((Date.now() - state.bruteForce.startTime) / 1000).toFixed(2);
                 
-                document.getElementById("bf-results").innerHTML += found ? 
-                    `<p style="color:#e74c3c;font-weight:700">PASSWORD FOUND: ${password}</p>
-                     <p>Total attempts: ${state.bruteForce.attempts.toLocaleString()}</p>
-                     <p>Total time: ${time}s</p>` :
-                    `<p>Password not found after ${state.bruteForce.attempts.toLocaleString()} attempts</p>
-                     <p>Total time: ${time}s</p>`;
+                const resultHTML = found
+                    ? `<p style="color:#e74c3c;font-weight:bold">PASSWORD FOUND: ${state.bruteForce.currentGuess}</p>
+                       <p>Total attempts: ${state.bruteForce.attempts.toLocaleString()}</p>
+                       <p>Total time: ${time}s</p>`
+                    : `<p>Password not found after ${state.bruteForce.attempts.toLocaleString()} attempts</p>
+                       <p>Total time: ${time}s</p>`;
                 
+                document.getElementById("bf-results").innerHTML += resultHTML;
                 document.getElementById("bf-start-btn").style.display = "block";
                 document.getElementById("bf-stop-btn").style.display = "none";
             },
+        
             generateGuess: (index, charset, length) => {
                 let result = "";
                 let remaining = index;
@@ -618,34 +639,36 @@
                 
                 return result;
             },
-            updateProgress: (length, currentGuess = "") => {
-                const progress = Math.min(100, state.bruteForce.attempts / state.bruteForce.totalCombinations * 100);
-                const timeElapsed = ((Date.now() - state.bruteForce.startTime) / 1000).toFixed(2);
-                const speed = Math.floor(state.bruteForce.attempts / (timeElapsed || 1));
+        
+            updateProgress: () => {
+                const elapsed = (Date.now() - state.bruteForce.startTime) / 1000;
+                const progress = Math.min(100, 
+                    (state.bruteForce.attempts / state.bruteForce.totalCombinations) * 100
+                );
+                const speed = Math.floor(state.bruteForce.attempts / elapsed);
                 
+                // Update progress bar
                 document.getElementById("bf-progress").style.width = `${progress}%`;
-                document.getElementById("bf-progress-text").textContent = `${progress.toFixed(2)}% complete`;
+                document.getElementById("bf-progress-text").textContent = 
+                    `${progress.toFixed(2)}% complete`;
                 
-                if (currentGuess) {
-                    const currentAttemptEl = document.getElementById("bf-current-attempt");
-                    if (currentAttemptEl) currentAttemptEl.textContent = currentGuess;
-                }
-                
-                const attemptCountEl = document.getElementById("bf-attempt-count");
-                if (attemptCountEl) attemptCountEl.textContent = state.bruteForce.attempts.toLocaleString();
-                
-                const timeElapsedEl = document.getElementById("bf-time-elapsed");
-                if (timeElapsedEl) timeElapsedEl.textContent = timeElapsed;
-                
-                const attemptRateEl = document.getElementById("bf-attempt-rate");
-                if (attemptRateEl) attemptRateEl.textContent = speed.toLocaleString();
+                // Update stats
+                document.getElementById("bf-current-attempt").textContent = 
+                    state.bruteForce.currentGuess;
+                document.getElementById("bf-attempt-count").textContent = 
+                    state.bruteForce.attempts.toLocaleString();
+                document.getElementById("bf-time-elapsed").textContent = 
+                    elapsed.toFixed(2);
+                document.getElementById("bf-attempt-rate").textContent = 
+                    speed.toLocaleString();
             },
+        
             getCharsetDescription: (charset) => {
                 const sets = [];
-                if (charset.includes(config.allowedChars.lowercase)) sets.push("lowercase");
-                if (charset.includes(config.allowedChars.uppercase)) sets.push("uppercase");
-                if (charset.includes(config.allowedChars.numbers)) sets.push("numbers");
-                if (charset.includes(config.allowedChars.symbols)) sets.push("symbols");
+                if (/[a-z]/.test(charset)) sets.push("lowercase");
+                if (/[A-Z]/.test(charset)) sets.push("uppercase");
+                if (/[0-9]/.test(charset)) sets.push("numbers");
+                if (/[!\-?._]/.test(charset)) sets.push("symbols");
                 return sets.join(" + ") || "lowercase";
             }
         };
