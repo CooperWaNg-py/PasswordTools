@@ -344,7 +344,49 @@
         .hidden-password {
             letter-spacing: 2px;
         }
+
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .decoded-section {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <h1>Password Toolkit Pro</h1>
@@ -478,13 +520,7 @@
                 <option value="1024">1024x1024</option>
             </select>
         </div>
-        <div class="input-group">
-            <label for="key-image-encoder">Encoder/Decoder Key:</label>
-            <input type="password" id="key-image-encoder" placeholder="Enter key to encode/decode password">
-            <button class="toggle-password" onclick="togglePasswordVisibility('key-image-encoder', this)">👁️</button>
-        </div>
         <button class="btn btn-primary" onclick="generateKeyImage()">Generate Key Image</button>
-        <button class="btn" onclick="decodePassword()" style="margin-left: 10px;">Decode Password</button>
         
         <div id="key-image-container" style="display:none">
             <canvas id="key-image-canvas"></canvas>
@@ -493,11 +529,22 @@
             </div>
         </div>
 
-        <div id="decoded-password-container" style="display:none; margin-top:1rem">
+        <div class="file-upload" id="image-upload-container">
+            <input type="file" id="image-upload" accept="image/*">
+            <label for="image-upload" class="file-upload-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Upload Key Image to Decode</span>
+                <span style="font-size:0.8rem; color:var(--gray); margin-top:0.5rem">Click or drag & drop image file</span>
+            </label>
+        </div>
+
+        <div id="decoded-result" class="decoded-section" style="display:none">
+            <h3>Decoded Password</h3>
             <div class="password-display">
-                <span id="decoded-password" class="hidden-password">••••••••••</span>
+                <span id="decoded-password">••••••••••</span>
                 <button class="copy-btn" onclick="copyDecodedPassword()">Copy</button>
             </div>
+            <div id="decoded-info" style="margin-top:1rem"></div>
         </div>
     </div>
 
@@ -542,7 +589,8 @@
             keyImage: {
                 canvas: null,
                 ctx: null,
-                encodedPassword: null
+                password: null,
+                encodedData: null
             }
         };
 
@@ -651,21 +699,6 @@
                     passwords += password.generate(levelConfig) + "\n";
                 }
                 return passwords;
-            },
-
-            encode: (text, key) => {
-                if (!text || !key) return text;
-                let result = "";
-                for (let i = 0; i < text.length; i++) {
-                    const textChar = text.charCodeAt(i);
-                    const keyChar = key.charCodeAt(i % key.length);
-                    result += String.fromCharCode(textChar ^ keyChar);
-                }
-                return result;
-            },
-
-            decode: (encodedText, key) => {
-                return password.encode(encodedText, key); // XOR is symmetric
             }
         };
 
@@ -850,6 +883,30 @@
                 const canvas = document.getElementById("key-image-canvas");
                 state.keyImage.canvas = canvas;
                 state.keyImage.ctx = canvas.getContext("2d");
+                
+                // Set up file upload
+                const fileUpload = document.getElementById("image-upload");
+                fileUpload.addEventListener("change", this.handleImageUpload.bind(this));
+                
+                // Set up drag and drop
+                const uploadContainer = document.getElementById("image-upload-container");
+                uploadContainer.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    uploadContainer.style.borderColor = "var(--primary)";
+                });
+                
+                uploadContainer.addEventListener("dragleave", () => {
+                    uploadContainer.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                });
+                
+                uploadContainer.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    uploadContainer.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                    if (e.dataTransfer.files.length) {
+                        fileUpload.files = e.dataTransfer.files;
+                        this.handleImageUpload({ target: fileUpload });
+                    }
+                });
             },
             
             generate: function() {
@@ -859,17 +916,12 @@
                 const size = parseInt(document.getElementById("key-image-size").value);
                 const canvas = state.keyImage.canvas;
                 const ctx = state.keyImage.ctx;
-                const encoderKey = document.getElementById("key-image-encoder").value;
                 
                 canvas.width = size;
                 canvas.height = size;
                 
-                // Encode the password if encoder key is provided
-                if (encoderKey) {
-                    state.keyImage.encodedPassword = password.encode(pwd, encoderKey);
-                } else {
-                    state.keyImage.encodedPassword = null;
-                }
+                // Store the password in state
+                state.keyImage.password = pwd;
                 
                 // Create a visual representation of the password
                 const hash = this.hashPassword(pwd);
@@ -878,11 +930,12 @@
                 // Generate a unique pattern based on the password
                 this.drawPattern(ctx, size, seed);
                 
+                // Store encoded data in the image
+                this.encodePasswordInImage(pwd);
+                
                 // Show the canvas
                 document.getElementById("key-image-container").style.display = "block";
-                
-                // Hide decoded password container if it was shown
-                document.getElementById("decoded-password-container").style.display = "none";
+                document.getElementById("decoded-result").style.display = "none";
             },
             
             hashPassword: function(pwd) {
@@ -932,15 +985,12 @@
                     ctx.fill();
                 }
                 
-                // Add password text in the center
-                const pwd = document.getElementById("key-image-password").value;
+                // Add password text in the center (hidden)
+                const hiddenPwd = "•".repeat(state.keyImage.password.length);
                 ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
                 ctx.font = `bold ${Math.max(12, size / 15)}px monospace`;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                
-                // Show dots instead of actual password
-                const hiddenPwd = "•".repeat(pwd.length);
                 ctx.fillText(hiddenPwd, size / 2, size / 2);
             },
             
@@ -951,6 +1001,108 @@
                     s = Math.sin(s) * 10000;
                     return s - Math.floor(s);
                 };
+            },
+            
+            encodePasswordInImage: function(pwd) {
+                // Convert password to binary data
+                const encoder = new TextEncoder();
+                const data = encoder.encode(pwd);
+                
+                // Store the encoded data in state
+                state.keyImage.encodedData = data;
+                
+                // Encode the password in the image's alpha channel
+                const canvas = state.keyImage.canvas;
+                const ctx = state.keyImage.ctx;
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Encode password length in first pixel
+                imageData.data[3] = pwd.length; // Alpha channel of first pixel
+                
+                // Encode password characters in subsequent pixels
+                for (let i = 0; i < data.length; i++) {
+                    const pixelIndex = 4 * (i + 1); // Skip first pixel
+                    if (pixelIndex + 3 < imageData.data.length) {
+                        // Store character code in alpha channel
+                        imageData.data[pixelIndex + 3] = data[i];
+                    }
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+            },
+            
+            decodePasswordFromImage: function(imageData) {
+                try {
+                    // Get password length from first pixel's alpha channel
+                    const length = imageData.data[3];
+                    
+                    // Get password characters from subsequent pixels
+                    let password = "";
+                    for (let i = 0; i < length; i++) {
+                        const pixelIndex = 4 * (i + 1); // Skip first pixel
+                        if (pixelIndex + 3 < imageData.data.length) {
+                            const charCode = imageData.data[pixelIndex + 3];
+                            password += String.fromCharCode(charCode);
+                        }
+                    }
+                    
+                    return password;
+                } catch (e) {
+                    console.error("Error decoding password from image:", e);
+                    return null;
+                }
+            },
+            
+            handleImageUpload: function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Create a canvas to process the image
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Get image data
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        
+                        // Try to decode password from image
+                        const decodedPassword = this.decodePasswordFromImage(imageData);
+                        
+                        if (decodedPassword) {
+                            // Show decoded password
+                            document.getElementById("decoded-password").textContent = decodedPassword;
+                            document.getElementById("decoded-info").innerHTML = `
+                                <p>Password successfully decoded from image.</p>
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-label">Length</div>
+                                        <div class="stat-value">${decodedPassword.length}</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Strength</div>
+                                        <div class="stat-value">${password.analyze(decodedPassword).strength}</div>
+                                    </div>
+                                </div>
+                            `;
+                            document.getElementById("decoded-result").style.display = "block";
+                        } else {
+                            document.getElementById("decoded-info").innerHTML = `
+                                <p style="color:var(--danger)">No password data found in this image.</p>
+                                <p>Make sure you uploaded an image generated by this tool.</p>
+                            `;
+                            document.getElementById("decoded-result").style.display = "block";
+                            document.getElementById("decoded-password").textContent = "No password found";
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             },
             
             save: function() {
@@ -1109,6 +1261,18 @@
             });
         }
         
+        function copyDecodedPassword() {
+            const text = document.getElementById("decoded-password").textContent;
+            if (text === "••••••••••" || text === "No password found") return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector("#decoded-result .copy-btn");
+                const original = btn.textContent;
+                btn.textContent = "Copied!";
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        }
+        
         function regenerateLevel(level) {
             const levelConfig = config.levels.find(l => l.level === level);
             const levelEl = document.querySelector(`.level-${level}`);
@@ -1137,31 +1301,6 @@
             keyImage.save();
         }
 
-        function decodePassword() {
-            const encoderKey = document.getElementById("key-image-encoder").value;
-            if (!encoderKey) {
-                return alert("Please enter the encoder/decoder key");
-            }
-            
-            if (!state.keyImage.encodedPassword) {
-                return alert("No encoded password found. Generate a key image first.");
-            }
-            
-            const decoded = password.decode(state.keyImage.encodedPassword, encoderKey);
-            document.getElementById("decoded-password").textContent = decoded;
-            document.getElementById("decoded-password-container").style.display = "block";
-        }
-
-        function copyDecodedPassword() {
-            const text = document.getElementById("decoded-password").textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector("#decoded-password-container .copy-btn");
-                const original = btn.textContent;
-                btn.textContent = "Copied!";
-                setTimeout(() => btn.textContent = original, 2000);
-            });
-        }
-
         // Global functions
         window.switchTab = ui.switchTab;
         window.togglePasswordVisibility = ui.togglePassword;
@@ -1169,13 +1308,12 @@
         window.stopBruteForce = () => bruteForce.stop(false);
         window.analyzePassword = ui.analyzePassword;
         window.copyToClipboard = copyToClipboard;
+        window.copyDecodedPassword = copyDecodedPassword;
         window.regenerateLevel = regenerateLevel;
         window.generateMassPasswords = ui.generateMassPasswords;
         window.savePasswordsToFile = ui.savePasswordsToFile;
         window.generateKeyImage = generateKeyImage;
         window.saveKeyImage = saveKeyImage;
-        window.decodePassword = decodePassword;
-        window.copyDecodedPassword = copyDecodedPassword;
 
         // Initialize
         window.onload = function() {
