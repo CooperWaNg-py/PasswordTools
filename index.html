@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Password Toolkit Pro</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
             --primary: #4361ee;
@@ -31,6 +32,12 @@
             color: var(--success);
             font-size: 2.5rem;
             text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .tab-container {
@@ -40,6 +47,12 @@
             border-radius: 10px;
             padding: 0.5rem;
             backdrop-filter: blur(10px);
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
         .tab {
@@ -54,12 +67,20 @@
         
         .tab:hover {
             background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
         
         .tab.active {
             background: var(--primary);
             color: white;
             box-shadow: 0 0 15px rgba(67, 97, 238, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
         }
         
         .section {
@@ -70,11 +91,17 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none; /* Hide all sections by default */
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .section.active {
-            display: block; /* Show active section */
+            display: block;
         }
         
         .password-display {
@@ -89,6 +116,12 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .password-display:hover {
+            transform: scale(1.01);
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
         }
         
         .btn {
@@ -99,6 +132,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
             font-size: 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
         .btn-primary {
@@ -131,7 +170,7 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, var(--primary), var(--success));
-            transition: width 0.3s ease;
+            transition: width 0.5s ease-out;
             position: relative;
             overflow: hidden;
         }
@@ -169,11 +208,13 @@
             min-width: 150px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: pulse 1.5s infinite alternate;
         }
         
         .input-group {
             margin-bottom: 1.5rem;
             position: relative;
+            animation: fadeIn 0.8s ease-out;
         }
         
         label {
@@ -198,6 +239,7 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+            transform: scale(1.01);
         }
         
         .toggle-password {
@@ -208,6 +250,12 @@
             border: none;
             color: var(--gray);
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-password:hover {
+            transform: scale(1.1);
+            color: var(--primary);
         }
         
         .result-box {
@@ -220,6 +268,7 @@
             max-height: 300px;
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
         }
         
         .warning {
@@ -227,6 +276,13 @@
             margin: 0.5rem 0;
             font-size: 0.9rem;
             display: none;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
         
         .stats-grid {
@@ -241,6 +297,12 @@
             border-radius: 8px;
             padding: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .stat-label {
@@ -257,18 +319,26 @@
         #key-image-container {
             margin-top: 1.5rem;
             text-align: center;
+            animation: fadeIn 0.8s ease-out;
         }
         
         #key-image-canvas {
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             max-width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        #key-image-canvas:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
         }
         
         .password-level {
             margin-bottom: 2rem;
             padding-left: 1rem;
             border-left: 4px solid var(--primary);
+            animation: fadeIn 0.8s ease-out;
         }
         
         .level-header {
@@ -306,7 +376,7 @@
         .strength-fill {
             height: 100%;
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease-out;
         }
         
         .entropy-display {
@@ -320,6 +390,12 @@
             color: var(--primary);
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.1);
+            color: var(--secondary);
         }
 
         .donation-section {
@@ -329,6 +405,7 @@
             border-radius: 8px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 1s ease-out;
         }
 
         .donation-address {
@@ -339,6 +416,12 @@
             display: inline-block;
             margin: 0.5rem 0;
             word-break: break-all;
+            transition: all 0.3s ease;
+        }
+        
+        .donation-address:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
         }
 
         .hidden-password {
@@ -355,10 +438,12 @@
             margin-bottom: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            animation: fadeIn 0.8s ease-out;
         }
 
         .file-upload:hover {
             border-color: var(--primary);
+            transform: scale(1.01);
         }
 
         .file-upload input {
@@ -376,6 +461,12 @@
             font-size: 2rem;
             margin-bottom: 0.5rem;
             color: var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload:hover .file-upload-label i {
+            transform: translateY(-5px);
+            color: var(--success);
         }
 
         .decoded-section {
@@ -384,6 +475,110 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .brute-force-settings {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .attempt-log {
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .attempt-log p {
+            margin: 0.2rem 0;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+        
+        .attempt-log p:hover {
+            transform: translateX(5px);
+        }
+        
+        .attempt-log p.found {
+            color: var(--success);
+            font-weight: bold;
+            animation: celebrate 1s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .auto-detect {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(76, 201, 240, 0.2);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark);
+            color: var(--light);
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -467,9 +662,40 @@
     <div id="brute-force" class="section">
         <div class="input-group">
             <label for="bf-target-password">Password to crack:</label>
-            <input type="password" id="bf-target-password" placeholder="Enter target password">
+            <input type="password" id="bf-target-password" placeholder="Enter target password" oninput="autoDetectBruteForceSettings()">
             <button class="toggle-password" onclick="togglePasswordVisibility('bf-target-password', this)">👁️</button>
+            <span class="auto-detect">Auto-detecting settings...</span>
         </div>
+        
+        <div class="brute-force-settings">
+            <h3>Brute Force Settings <span class="tooltip">ⓘ<span class="tooltiptext">These settings are automatically detected based on your password</span></span></h3>
+            <div class="settings-grid">
+                <div>
+                    <label for="bf-max-length">Max Length:</label>
+                    <input type="number" id="bf-max-length" min="1" max="10" value="6" readonly>
+                </div>
+                <div>
+                    <label for="bf-charset">Character Set:</label>
+                    <select id="bf-charset" disabled>
+                        <option value="lowercase">Lowercase (a-z)</option>
+                        <option value="uppercase">Uppercase (A-Z)</option>
+                        <option value="numbers">Numbers (0-9)</option>
+                        <option value="alphanumeric">Alphanumeric (a-z, 0-9)</option>
+                        <option value="all" selected>All (a-z, A-Z, 0-9, symbols)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="bf-batch-size">Batch Size:</label>
+                    <select id="bf-batch-size">
+                        <option value="1000">1,000 attempts</option>
+                        <option value="5000" selected>5,000 attempts</option>
+                        <option value="10000">10,000 attempts</option>
+                        <option value="50000">50,000 attempts</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
         <button class="btn btn-primary" id="bf-start-btn" onclick="startBruteForce()">Start Simulation</button>
         <button class="btn" id="bf-stop-btn" onclick="stopBruteForce()" style="display:none; width:100%; margin-top:1rem">Stop</button>
         
@@ -501,6 +727,8 @@
                 <div class="stat-value" id="bf-attempt-rate">0/s</div>
             </div>
         </div>
+        
+        <div class="attempt-log" id="bf-attempt-log"></div>
         
         <div id="bf-results" style="margin-top:1.5rem"></div>
     </div>
@@ -571,20 +799,15 @@
                 {level:3, name:"Moderate", length:[8,12], charset:["lowercase","uppercase","numbers"]},
                 {level:4, name:"Strong", length:[12,17], charset:["lowercase","uppercase","numbers","symbols"]},
                 {level:5, name:"Extreme", length:[20,30], charset:["lowercase","uppercase","numbers","symbols"]}
-            ],
-            bruteForce: {
-                batchSize: 5000,      // Attempts per batch
-                switchInterval: 100000, // Switch batches every 100k attempts
-                updateInterval: 100    // UI update every 100ms
-            }
+            ]
         };
 
         // State management
         const state = {
             bruteForce: {
                 running: false,
-                testedSets: new Set(), // Track tested starting points
-                worker: null            // For Web Worker implementation
+                worker: null,
+                autoDetectTimeout: null
             },
             keyImage: {
                 canvas: null,
@@ -702,17 +925,36 @@
             }
         };
 
-        // Brute Force Implementation
+        // Enhanced Brute Force Implementation
         const bruteForce = {
             start: () => {
                 const target = document.getElementById("bf-target-password").value.trim();
                 if (!target) return alert("Please enter a target password");
                 
+                // Get settings from UI
+                const maxLength = parseInt(document.getElementById("bf-max-length").value);
+                const charsetType = document.getElementById("bf-charset").value;
+                const batchSize = parseInt(document.getElementById("bf-batch-size").value);
+                
+                // Determine character set based on selection
+                let charset;
+                switch(charsetType) {
+                    case "lowercase": charset = config.allowedChars.lowercase; break;
+                    case "uppercase": charset = config.allowedChars.uppercase; break;
+                    case "numbers": charset = config.allowedChars.numbers; break;
+                    case "alphanumeric": 
+                        charset = config.allowedChars.lowercase + config.allowedChars.numbers; 
+                        break;
+                    case "all":
+                    default:
+                        charset = password.getCharset(["lowercase", "uppercase", "numbers", "symbols"]);
+                        break;
+                }
+                
                 // Validate password only contains allowed characters
-                const allowedChars = password.getCharset(["lowercase", "uppercase", "numbers", "symbols"]);
                 for (const char of target) {
-                    if (!allowedChars.includes(char)) {
-                        return alert(`Invalid character '${char}'. Only A-Z, a-z, 0-9, and ._-!?*, allowed`);
+                    if (!charset.includes(char)) {
+                        return alert(`Invalid character '${char}'. Not in selected character set.`);
                     }
                 }
                 
@@ -721,134 +963,209 @@
                     running: true,
                     startTime: Date.now(),
                     attempts: 0,
-                    charset: password.detectCharset(target),
+                    charset: charset,
                     target: target,
                     length: target.length,
+                    maxLength: maxLength,
                     currentGuess: "",
-                    testedSets: new Set(),
-                    currentBatchStart: Math.floor(Math.random() * Math.pow(26, target.length)),
-                    batchSwapCounter: 0,
-                    lastUpdate: 0
+                    currentBatchStart: 0,
+                    batchSize: batchSize,
+                    lastUpdate: 0,
+                    found: false,
+                    currentLength: 1, // Start with length 1
+                    totalCombinations: 0,
+                    attemptLog: []
                 };
                 
-                state.bruteForce.totalCombinations = Math.pow(
-                    state.bruteForce.charset.length, 
-                    state.bruteForce.length
-                );
+                // Calculate total combinations for progress tracking
+                bruteForce.calculateTotalCombinations();
                 
                 // Initialize UI
                 document.getElementById("bf-results").innerHTML = `
-                    <p>Starting brute force simulation...</p>
-                    <p>Password length: ${state.bruteForce.length}</p>
-                    <p>Character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)}</p>
+                    <p>Starting brute force simulation with:</p>
+                    <p>Character set: ${bruteForce.getCharsetDescription(state.bruteForce.charset)} (${state.bruteForce.charset.length} chars)</p>
+                    <p>Max length: ${state.bruteForce.maxLength}</p>
                     <p>Total combinations: ${state.bruteForce.totalCombinations.toLocaleString()}</p>
                 `;
                 
                 document.getElementById("bf-start-btn").style.display = "none";
                 document.getElementById("bf-stop-btn").style.display = "block";
+                document.getElementById("bf-attempt-log").innerHTML = "";
                 
-                // Start processing
-                bruteForce.processBatch();
+                // Use Web Worker for better performance
+                bruteForce.startWorker();
             },
             
-            processBatch: function() {
-                if (!state.bruteForce.running) return;
-                
-                const batchStart = performance.now();
-                const batchSize = config.bruteForce.batchSize;
-                const swapInterval = config.bruteForce.switchInterval;
-                let found = false;
-                
-                for (let i = 0; i < batchSize; i++) {
-                    // Check if we should switch batches
-                    if (state.bruteForce.batchSwapCounter >= swapInterval) {
-                        bruteForce.switchBatch();
+            startWorker: function() {
+                if (window.Worker) {
+                    // Terminate any existing worker
+                    if (state.bruteForce.worker) {
+                        state.bruteForce.worker.terminate();
                     }
                     
-                    // Generate current attempt
-                    const attemptIndex = 
-                        (state.bruteForce.currentBatchStart + state.bruteForce.attempts) % 
-                        state.bruteForce.totalCombinations;
+                    // Create new worker
+                    const workerCode = `
+                        const bruteForceWorker = {
+                            generateAttempt: function(index, charset, length) {
+                                let result = "";
+                                let remaining = index;
+                                
+                                for (let i = 0; i < length; i++) {
+                                    const charIndex = remaining % charset.length;
+                                    result = charset[charIndex] + result;
+                                    remaining = Math.floor(remaining / charset.length);
+                                }
+                                return result;
+                            },
+                            
+                            processBatch: function(data) {
+                                const { startIndex, batchSize, charset, target, currentLength, maxLength } = data;
+                                let attempts = [];
+                                let found = false;
+                                let result = null;
+                                
+                                let index = startIndex;
+                                let length = currentLength;
+                                let count = 0;
+                                
+                                while (count < batchSize && !found && length <= maxLength) {
+                                    const maxAttemptsForLength = Math.pow(charset.length, length);
+                                    
+                                    if (index < maxAttemptsForLength) {
+                                        const attempt = this.generateAttempt(index, charset, length);
+                                        attempts.push(attempt);
+                                        
+                                        if (attempt === target) {
+                                            found = true;
+                                            result = attempt;
+                                            break;
+                                        }
+                                        
+                                        index++;
+                                        count++;
+                                    } else {
+                                        // Move to next length
+                                        length++;
+                                        index = 0;
+                                    }
+                                }
+                                
+                                return {
+                                    attempts: attempts,
+                                    found: found,
+                                    result: result,
+                                    nextIndex: index,
+                                    nextLength: length,
+                                    processedCount: count
+                                };
+                            }
+                        };
+                        
+                        self.onmessage = function(e) {
+                            const result = bruteForceWorker.processBatch(e.data);
+                            self.postMessage(result);
+                        };
+                    `;
                     
-                    state.bruteForce.currentGuess = bruteForce.generateGuess(
-                        attemptIndex,
-                        state.bruteForce.charset,
-                        state.bruteForce.length
-                    );
+                    const blob = new Blob([workerCode], { type: 'application/javascript' });
+                    const workerUrl = URL.createObjectURL(blob);
+                    state.bruteForce.worker = new Worker(workerUrl);
                     
-                    // Check for match
-                    if (state.bruteForce.currentGuess === state.bruteForce.target) {
-                        found = true;
-                        break;
-                    }
+                    state.bruteForce.worker.onmessage = function(e) {
+                        const result = e.data;
+                        
+                        // Update attempts
+                        state.bruteForce.attempts += result.processedCount;
+                        state.bruteForce.currentBatchStart = result.nextIndex;
+                        state.bruteForce.currentLength = result.nextLength;
+                        
+                        // Update attempt log
+                        state.bruteForce.attemptLog = state.bruteForce.attemptLog.concat(result.attempts);
+                        if (state.bruteForce.attemptLog.length > 20) {
+                            state.bruteForce.attemptLog = state.bruteForce.attemptLog.slice(-20);
+                        }
+                        
+                        // Update current guess
+                        if (result.attempts.length > 0) {
+                            state.bruteForce.currentGuess = result.attempts[result.attempts.length - 1];
+                        }
+                        
+                        // Check if found
+                        if (result.found) {
+                            state.bruteForce.found = true;
+                            state.bruteForce.currentGuess = result.result;
+                            bruteForce.stop(true);
+                            return;
+                        }
+                        
+                        // Check if completed all combinations
+                        if (state.bruteForce.currentLength > state.bruteForce.maxLength) {
+                            bruteForce.stop(false);
+                            return;
+                        }
+                        
+                        // Update UI
+                        bruteForce.updateProgress();
+                        
+                        // Continue processing if still running
+                        if (state.bruteForce.running && !state.bruteForce.found) {
+                            bruteForce.sendNextBatch();
+                        }
+                    };
                     
-                    state.bruteForce.attempts++;
-                    state.bruteForce.batchSwapCounter++;
-                    
-                    // Check completion
-                    if (state.bruteForce.attempts >= state.bruteForce.totalCombinations) {
-                        bruteForce.stop(false);
-                        return;
-                    }
-                    
-                    // Yield to browser if processing takes too long
-                    if (performance.now() - batchStart > 16) break;
-                }
-                
-                // Update UI periodically
-                const now = Date.now();
-                if (now - state.bruteForce.lastUpdate > config.bruteForce.updateInterval || found) {
-                    bruteForce.updateProgress();
-                    state.bruteForce.lastUpdate = now;
-                }
-                
-                if (found) {
-                    bruteForce.stop(true);
+                    // Start first batch
+                    bruteForce.sendNextBatch();
                 } else {
-                    // Continue processing
-                    requestAnimationFrame(bruteForce.processBatch);
+                    // Fallback to non-worker implementation
+                    bruteForce.processBatch();
                 }
             },
             
-            switchBatch: function() {
-                let newStart;
-                do {
-                    newStart = Math.floor(Math.random() * state.bruteForce.totalCombinations);
-                } while (state.bruteForce.testedSets.has(newStart) && 
-                         state.bruteForce.testedSets.size < state.bruteForce.totalCombinations);
+            sendNextBatch: function() {
+                if (!state.bruteForce.running || state.bruteForce.found) return;
                 
-                state.bruteForce.currentBatchStart = newStart;
-                state.bruteForce.testedSets.add(newStart);
-                state.bruteForce.batchSwapCounter = 0;
+                state.bruteForce.worker.postMessage({
+                    startIndex: state.bruteForce.currentBatchStart,
+                    batchSize: state.bruteForce.batchSize,
+                    charset: state.bruteForce.charset,
+                    target: state.bruteForce.target,
+                    currentLength: state.bruteForce.currentLength,
+                    maxLength: state.bruteForce.maxLength
+                });
+            },
+            
+            calculateTotalCombinations: function() {
+                let total = 0;
+                const charsetLength = state.bruteForce.charset.length;
+                for (let len = 1; len <= state.bruteForce.maxLength; len++) {
+                    total += Math.pow(charsetLength, len);
+                }
+                state.bruteForce.totalCombinations = total;
             },
             
             stop: function(found) {
                 state.bruteForce.running = false;
                 const time = ((Date.now() - state.bruteForce.startTime) / 1000).toFixed(2);
                 
+                if (state.bruteForce.worker) {
+                    state.bruteForce.worker.terminate();
+                    state.bruteForce.worker = null;
+                }
+                
                 const resultHTML = found
                     ? `<p style="color:#4cc9f0;font-weight:bold">🎉 PASSWORD FOUND: ${state.bruteForce.currentGuess}</p>
                        <p>Total attempts: ${state.bruteForce.attempts.toLocaleString()}</p>
                        <p>Total time: ${time}s</p>`
                     : `<p>Password not found after ${state.bruteForce.attempts.toLocaleString()} attempts</p>
-                       <p>Total time: ${time}s</p>`;
+                       <p>Total time: ${time}s</p>
+                       <p>All possible combinations for the selected character set and length have been tried.</p>`;
                 
                 document.getElementById("bf-results").innerHTML += resultHTML;
                 document.getElementById("bf-start-btn").style.display = "block";
                 document.getElementById("bf-stop-btn").style.display = "none";
-            },
-            
-            generateGuess: function(index, charset, length) {
-                let result = "";
-                let remaining = index;
                 
-                for (let i = 0; i < length; i++) {
-                    const charIndex = remaining % charset.length;
-                    result = charset[charIndex] + result;
-                    remaining = Math.floor(remaining / charset.length);
-                }
-                
-                return result;
+                // Final UI update
+                bruteForce.updateProgress();
             },
             
             updateProgress: function() {
@@ -865,6 +1182,20 @@
                 document.getElementById("bf-attempt-count").textContent = state.bruteForce.attempts.toLocaleString();
                 document.getElementById("bf-time-elapsed").textContent = `${elapsed.toFixed(2)}s`;
                 document.getElementById("bf-attempt-rate").textContent = `${speed.toLocaleString()}/s`;
+                
+                // Update attempt log
+                const logElement = document.getElementById("bf-attempt-log");
+                logElement.innerHTML = "";
+                state.bruteForce.attemptLog.forEach(attempt => {
+                    const p = document.createElement("p");
+                    p.textContent = attempt;
+                    if (attempt === state.bruteForce.target && state.bruteForce.found) {
+                        p.classList.add("found");
+                        p.textContent = "✅ " + p.textContent;
+                    }
+                    logElement.appendChild(p);
+                });
+                logElement.scrollTop = logElement.scrollHeight;
             },
             
             getCharsetDescription: function(charset) {
@@ -876,6 +1207,55 @@
                 return sets.join(" + ") || "lowercase";
             }
         };
+
+        // Auto-detect brute force settings
+        function autoDetectBruteForceSettings() {
+            const target = document.getElementById("bf-target-password").value.trim();
+            
+            // Clear previous timeout
+            if (state.bruteForce.autoDetectTimeout) {
+                clearTimeout(state.bruteForce.autoDetectTimeout);
+            }
+            
+            // Show loading indicator
+            const autoDetectElement = document.querySelector(".auto-detect");
+            autoDetectElement.innerHTML = '<span class="loading-spinner"></span> Detecting settings...';
+            
+            // Delay detection to avoid doing it on every keystroke
+            state.bruteForce.autoDetectTimeout = setTimeout(() => {
+                if (!target) {
+                    autoDetectElement.textContent = "Auto-detecting settings...";
+                    return;
+                }
+                
+                // Detect character set
+                let charsetType = "all";
+                const hasLower = /[a-z]/.test(target);
+                const hasUpper = /[A-Z]/.test(target);
+                const hasDigits = /[0-9]/.test(target);
+                const hasSymbols = /[._\-!?*,]/.test(target);
+                
+                if (hasLower && !hasUpper && !hasDigits && !hasSymbols) {
+                    charsetType = "lowercase";
+                } else if (!hasLower && hasUpper && !hasDigits && !hasSymbols) {
+                    charsetType = "uppercase";
+                } else if (!hasLower && !hasUpper && hasDigits && !hasSymbols) {
+                    charsetType = "numbers";
+                } else if (hasLower && !hasUpper && hasDigits && !hasSymbols) {
+                    charsetType = "alphanumeric";
+                }
+                
+                // Update UI
+                document.getElementById("bf-max-length").value = target.length;
+                document.getElementById("bf-charset").value = charsetType;
+                
+                // Show confirmation
+                autoDetectElement.innerHTML = '✅ Settings detected!';
+                setTimeout(() => {
+                    autoDetectElement.textContent = "Auto-detection complete";
+                }, 2000);
+            }, 500);
+        }
 
         // Key Image Generator
         const keyImage = {
@@ -1314,6 +1694,7 @@
         window.savePasswordsToFile = ui.savePasswordsToFile;
         window.generateKeyImage = generateKeyImage;
         window.saveKeyImage = saveKeyImage;
+        window.autoDetectBruteForceSettings = autoDetectBruteForceSettings;
 
         // Initialize
         window.onload = function() {
